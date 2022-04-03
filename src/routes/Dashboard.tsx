@@ -6,23 +6,30 @@ import styled from "styled-components";
 import Page from "../components/Page";
 import { availableGranularities, defaultDateFilterOptions } from "../mock/initialDateData";
 import * as Md from "../md/full";
-import Calculations from "../components/Calculations/Calculations";
+import CalculationSelector from "../components/CalculationSelector/CalculationSelector";
 
 const FilterBar = styled.div`
     padding: 1rem;
-    display: flex;
-    width: 200
+    display: block;
+    width: 200px;
 `;
 
 const Row = styled.div`
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
 `;
 
 const Column = styled.div`
     display: flex;
     flex-direction: column;
-    flex: 1;
+    flex: 50%;
+    min-height: 400px;
+
+    @media (max-width: 800px) {
+        flex: 100%;
+        max-width: 100%;
+    }
 `;
 
 const Revenue = modifyMeasure(Md.Revenue, (m) => m.format("#,##0"));
@@ -31,18 +38,17 @@ const Dashboard = () => {
     const [selectedDateOption, setSelectedDateOption] = useState(defaultDateFilterOptions.allTime);
     const [excludedPeriod, setExcludedPeriod] = useState<boolean>(false);
 
-    const onApply = (dateFilterOption: any, excludeCurrentPeriod: boolean) => {
-        setSelectedDateOption(dateFilterOption);
-        setExcludedPeriod(excludeCurrentPeriod);
-    };
-
     const measures = [Revenue];
-
     const dateFilter = DateFilterHelpers.mapOptionToAfm(
         selectedDateOption as DateFilterOption,
         Md.DateDatasets.Date.ref,
         excludedPeriod,
     );
+
+    const onApply = (dateFilterOption: any, excludeCurrentPeriod: boolean) => {
+        setSelectedDateOption(dateFilterOption);
+        setExcludedPeriod(excludeCurrentPeriod);
+    };
 
     return (
         <Page>
@@ -75,7 +81,7 @@ const Dashboard = () => {
                     />
                 </Column>
                 <Column>
-                    <Calculations measures={measures} />
+                    <CalculationSelector measure={Revenue} />
                 </Column>
             </Row>
         </Page>
