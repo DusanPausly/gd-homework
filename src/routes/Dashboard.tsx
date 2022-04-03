@@ -1,15 +1,33 @@
-import { DateFilter } from "@gooddata/sdk-ui-filters";
-import React, { useState } from "react";
+import { modifyMeasure } from "@gooddata/sdk-model";
+import { LineChart } from "@gooddata/sdk-ui-charts";
+import { DateFilter, DateFilterHelpers, DateFilterOption } from "@gooddata/sdk-ui-filters";
+import { useState } from "react";
 import styled from "styled-components";
 import Page from "../components/Page";
 import { availableGranularities, defaultDateFilterOptions } from "../mock/initialDateData";
+import * as Md from "../md/full";
+import Calculations from "../components/Calculations/Calculations";
 
 const FilterBar = styled.div`
     padding: 1rem;
     display: flex;
+    width: 200
 `;
 
-const Dashboard: React.FC = () => {
+const Row = styled.div`
+    display: flex;
+    flex-direction: row;
+`;
+
+const Column = styled.div`
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+`;
+
+const Revenue = modifyMeasure(Md.Revenue, (m) => m.format("#,##0"));
+
+const Dashboard = () => {
     const [selectedDateOption, setSelectedDateOption] = useState(defaultDateFilterOptions.allTime);
     const [excludedPeriod, setExcludedPeriod] = useState<boolean>(false);
 
@@ -17,6 +35,14 @@ const Dashboard: React.FC = () => {
         setSelectedDateOption(dateFilterOption);
         setExcludedPeriod(excludeCurrentPeriod);
     };
+
+    const measures = [Revenue];
+
+    const dateFilter = DateFilterHelpers.mapOptionToAfm(
+        selectedDateOption as DateFilterOption,
+        Md.DateDatasets.Date.ref,
+        excludedPeriod,
+    );
 
     return (
         <Page>
@@ -38,6 +64,20 @@ const Dashboard: React.FC = () => {
                     onApply={onApply}
                 />
             </FilterBar>
+
+            <Row>
+                <Column>
+                    <LineChart
+                        measures={measures}
+                        segmentBy={Md.Product.Default}
+                        trendBy={Md.DateDatasets.Date.Month.Short}
+                        filters={dateFilter ? [dateFilter] : []}
+                    />
+                </Column>
+                <Column>
+                    <Calculations measures={measures} />
+                </Column>
+            </Row>
         </Page>
     );
 };
